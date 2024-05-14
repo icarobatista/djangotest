@@ -44,14 +44,16 @@ def logout(request):
     auth.logout(request)
     return redirect("")
 
+
+#Lista de Tarefas do Usuáro
 @login_required
-#Lista de Tarefas do Usuárop
 def dashboard(request): 
     tasks = Task.objects.filter(user=request.user)
     context = {'tasks': tasks}
     return render(request, 'tasks/dashboard.html', context=context)
 
 #Formulário de Criação de Tarefa
+@login_required
 def createTask(request):
     form = TaskForm()
     if request.method == "POST":
@@ -64,7 +66,9 @@ def createTask(request):
 
     context = {'createForm': form}
     return render(request, 'tasks/create.html', context=context)
+
 #Formulário de Edição da Tarefa
+@login_required
 def updateTask(request, id):
     task = Task.objects.get(id=id)
     form = TaskForm(instance=task);
@@ -76,7 +80,9 @@ def updateTask(request, id):
 
     context = {'updateForm': form}
     return render(request, 'tasks/update.html', context=context)
+
 #Função para apagar tarefas
+@login_required
 def deleteTask(request, id):
     Task.objects.get(id=id).delete()
     return redirect("dashboard")
