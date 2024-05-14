@@ -1,0 +1,8 @@
+<a href="{% url 'register' %}" >Criar Usuário</a>
+<form method="post" >
+  {% csrf_token %}
+  {{loginForm.as_p}}
+  <input type="submit" value="Login" />
+
+</form>
+
