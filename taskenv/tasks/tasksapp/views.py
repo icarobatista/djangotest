@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
-from .  forms import CreateUserForm, LoginForm
+from .  forms import CreateUserForm, LoginForm, TaskForm
+from . models import Task
 from django.contrib.auth.models import auth
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -36,15 +37,47 @@ def login(request):
             auth.login(request, user)
             return redirect("dashboard")
 
-
-    
     context = {'loginForm': form}
     return render(request, 'auth/login.html', context=context)
 
 def logout(request):
     auth.logout(request)
     return redirect("")
-    
+
 @login_required
+#Lista de Tarefas do Usuárop
 def dashboard(request): 
-    return render(request, 'tasks/dashboard.html')
+    tasks = Task.objects.filter(user=request.user)
+    context = {'tasks': tasks}
+    return render(request, 'tasks/dashboard.html', context=context)
+
+#Formulário de Criação de Tarefa
+def createTask(request):
+    form = TaskForm()
+    if request.method == "POST":
+        form = TaskForm(request.POST)
+        if form.is_valid():
+            task = form.save(commit=False)
+            task.user = request.user
+            task.save()
+            return redirect("dashboard")
+
+    context = {'createForm': form}
+    return render(request, 'tasks/create.html', context=context)
+#Formulário de Edição da Tarefa
+def updateTask(request, id):
+    task = Task.objects.get(id=id)
+    form = TaskForm(instance=task);
+    if request.method == "POST":
+        form = TaskForm(request.POST, instance=task)
+        if form.is_valid():
+            task.save()
+            return redirect("dashboard")
+
+    context = {'updateForm': form}
+    return render(request, 'tasks/update.html', context=context)
+#Função para apagar tarefas
+def deleteTask(request, id):
+    Task.objects.get(id=id).delete()
+    return redirect("dashboard")
+
